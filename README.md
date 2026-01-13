@@ -10,7 +10,7 @@ All binaries are verified to parse the data, handle formatting (e.g., Red Text f
 
 | Language | Binary Size | Floppy Fit | Notes |
 | :--- | :--- | :--- | :--- |
-| **Forth** | `~4.5 KB`* | ✅ Yes | *Script source size. Requires `gforth` VM installed. |
+| **Forth** | `~4.5 KB`* | ✅ Yes | *Script/Image size. Requires `gforth` VM (or bundled). |
 | **C (Nostart)** | `~9.0 KB` | ✅ Yes | Experimental `-nostartfiles`. (Crash prone on macOS). |
 | **C (Standard)** | `~9.4 KB` | ✅ Yes | Standard GCC build. |
 | **C++** | `~9.5 KB` | ✅ Yes | Optimized with `-fno-rtti -fno-exceptions`. |
@@ -31,125 +31,125 @@ All binaries are verified to parse the data, handle formatting (e.g., Red Text f
 ## Build Instructions
 
 ### Prerequisites
--   `gcc`, `g++`, `gfortran` (GCC suite)
--   `fpc` (Free Pascal Compiler)
--   `zig` (Zig Compiler)
--   `rustc` / `cargo` (Rust)
--   `go` (Go)
--   `gforth` (GNU Forth)
--   `odin` (Odin Compiler)
--   `xz` (XZ Utils - runtime dependency for decompression)
+
+| Tool | macOS | Linux (Debian/Ubuntu) | Windows (PowerShell) |
+| :--- | :--- | :--- | :--- |
+| **GCC Suite** | `xcode-select --install` | `sudo apt install build-essential gfortran` | Install [MinGW-w64](https://www.mingw-w64.org/) |
+| **Free Pascal** | [Installer](https://www.freepascal.org/download.var) | `sudo apt install fpc` | [Download](https://www.freepascal.org/download.var) |
+| **Zig** | `brew install zig` | [Download](https://ziglang.org/download/) | `winget install zig.zig` |
+| **Rust** | `brew install rust` | `curl ... \| sh` | [Rustup.rs](https://rustup.rs/) |
+| **Go** | `brew install go` | `sudo apt install golang` | [Go Installer](https://go.dev/dl/) |
+| **XZ Utils** | `brew install xz` | `sudo apt install xz-utils` | [XZ for Windows](https://tukaani.org/xz/) (Add to PATH) |
+
+### Setup (All Platforms)
+Ensure `xz` (or `xz.exe`) is in your system PATH. The readers rely on `popen("xz -d ...")` to read the compressed data.
 
 ### Instructions
 
-1.  **C Implementation** (Winner)
+1.  **C Implementation (Recommended)**
+    *Platform: All*
     ```bash
     cd bible_reader_c
     gcc -O3 -s -o main main.c
     ./main read Ioan 3 16
     ```
 
-2.  **C Implementation (Experimental -nostartfiles)**
+2.  **C Nostartfiles (Experimental)**
+    *Platform: macOS / Linux (x86_64)*
     ```bash
     cd bible_reader_c_nostart
+    # macOS:
     gcc -Os -s -nostartfiles -Wl,-e,_start -o main main.c
+    # Linux (Remove underscores):
+    # gcc -Os -s -nostartfiles -Wl,-e,start -o main main.c
     ./main read Ioan 3 16
     ```
 
 3.  **C++ Implementation**
+    *Platform: All*
     ```bash
     cd bible_reader_cpp
     g++ -O3 -s -fno-rtti -fno-exceptions -o main main.cpp
     ./main read Ioan 3 16
     ```
 
-3.  **Fortran Implementation (Optimized)**
+4.  **Fortran Implementation (Optimized)**
+    *Platform: All (macOS/Linux use `-Wl,-dead_strip`)*
     ```bash
     cd bible_reader_fortran_opt
     gfortran -Os -s -Wl,-dead_strip -o main main.f90
     ./main read Ioan 3 16
     ```
 
-4.  **Fortran Implementation (Standard)**
-    ```bash
-    cd bible_reader_fortran
-    gfortran -O3 -s -o main main.f90
-    ./main read Ioan 3 16
-    ```
-
-5.  **Odin Implementation**
-    ```bash
-    cd bible_reader_odin
-    odin build main.odin -file -o:speed -no-bounds-check
-    ./main read Ioan 3 16
-    ```
-
-5.  **Forth Implementation** (Script)
-    ```bash
-    cd bible_reader_forth
-    gforth main.fs read Ioan 3 16
-    ```
-
-6.  **Zig Implementation (Optimized)**
+5.  **Zig Implementation (Optimized)**
+    *Platform: All*
     ```bash
     cd bible_reader_zig_opt
     zig build-exe main.zig -O ReleaseSmall -fstrip -lc
     ./main read Ioan 3 16
     ```
 
-7.  **Zig Implementation (Standard)**
-    ```bash
-    cd bible_reader_zig
-    zig build-exe main.zig -O ReleaseSmall -fstrip -fsingle-threaded
-    ./main read Ioan 3 16
-    ```
-
-9.  **Pascal Implementation (Optimized)**
+6.  **Pascal Implementation (Optimized)**
+    *Platform: All (Windows uses `main.exe`)*
     ```bash
     cd bible_reader_pascal_opt
     fpc -O3 -XX -Xs -omain main.pas
-    strip main
+    # Optional: strip main (or main.exe)
     ./main read Ioan 3 16
     ```
 
-10. **Pascal Implementation (Standard)**
-    ```bash
-    cd bible_reader_pascal
-    fpc -O3 -XX -Xs -o main main.pas
-    ./main read Ioan 3 16
-    ```
-
-11. **Rust Implementation**
-    ```bash
-    cd bible_reader_rust
-    cargo build --release
-    strip target/release/bible_reader_rust
-    mv target/release/bible_reader_rust main
-    ./main read Ioan 3 16
-    ```
-
-12. **Rust Implementation (Optimized)**
+7.  **Rust Implementation (Optimized)**
+    *Platform: All (Remove `-C link-arg` on Linux/Windows)*
     ```bash
     cd bible_reader_rust_opt
+    # macOS:
     RUSTFLAGS="-C link-arg=-lSystem" cargo build --release
+    # Linux/Windows:
+    # cargo build --release
+
     strip target/release/bible_reader_rust_opt
+    # Windows: copy target\release\bible_reader_rust_opt.exe main.exe
     mv target/release/bible_reader_rust_opt main
     ./main read Ioan 3 16
     ```
 
-13. **Go Implementation (Optimized)**
+8.  **Go Implementation (Optimized)**
+    *Platform: All*
     ```bash
     cd bible_reader_go_opt
     tinygo build -o main -opt=z -no-debug main.go
     ./main read Ioan 3 16
     ```
 
-14. **Go Implementation (Standard)**
+9.  **Odin Implementation**
+    *Platform: All*
     ```bash
-    cd bible_reader
-    go build -ldflags="-s -w" -o main main.go
+    cd bible_reader_odin
+    odin build main.odin -file -o:speed -no-bounds-check
     ./main read Ioan 3 16
     ```
+
+10. **Forth Implementation (Termkey Image)**
+    *Platform: All*
+    ```bash
+    cd bible_reader_forth
+    # Generate 'reader.fi' image (Turnkey)
+    gforth -e "include main.fs savesystem reader.fi bye"
+
+    # Run the image (Requires Gforth installed)
+    gforth -i reader.fi read Ioan 3 16
+    ```
+
+    *Linux "Standalone" Trick:*
+    ```bash
+    # Concatenate engine + image
+    cat `which gforth-fast` reader.fi > bible_reader
+    chmod +x bible_reader
+    ./bible_reader read Ioan 3 16
+    ```
+
+    *Windows:*
+    Ship `reader.fi` with `gforth.exe`, and create a shortcut to run `gforth.exe -i reader.fi`.
 
 ## CLI Usage
 
