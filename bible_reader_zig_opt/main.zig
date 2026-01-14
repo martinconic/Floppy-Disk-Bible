@@ -163,9 +163,14 @@ fn printFormatted(s: [*c]const u8) void {
                 i += 19;
                 continue;
             }
-             if (strncmp(curr, "<span class=\"Isus\">", 19) == 0) {
+            if (strncmp(curr, "<span class=\"Isus\">", 19) == 0) {
                 _ = printf(red);
                 i += 19;
+                continue;
+            }
+             if (strncmp(curr, "<span class=\\'Isus\\'>", 21) == 0) {
+                _ = printf(red);
+                i += 21;
                 continue;
             }
             if (strncmp(curr, "</span>", 7) == 0) {

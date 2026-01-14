@@ -3,7 +3,7 @@
 
 extern crate libc;
 
-use libc::{c_char, c_int, c_void, FILE};
+use libc::{c_char, c_int, c_void};
 use core::panic::PanicInfo;
 
 // Constants
@@ -12,13 +12,7 @@ const MAX_LINE: usize = 4096;
 // Helper to convert C string to slice (limited usage)
 // We will mostly work with raw pointers for minimal overhead, C-style.
 
-unsafe fn strlen(s: *const c_char) -> usize {
-    let mut len = 0;
-    while *s.add(len) != 0 {
-        len += 1;
-    }
-    len
-}
+
 
 unsafe fn strncmp(s1: *const c_char, s2: *const c_char, n: usize) -> i32 {
     libc::strncmp(s1, s2, n)
@@ -32,9 +26,7 @@ unsafe fn strcasecmp(s1: *const c_char, s2: *const c_char) -> c_int {
     libc::strcasecmp(s1, s2)
 }
 
-unsafe fn memcpy(dest: *mut c_void, src: *const c_void, n: usize) -> *mut c_void {
-    libc::memcpy(dest, src, n)
-}
+
 
 // Custom formatted print for red text
 unsafe fn print_formatted(s: *const c_char) {
@@ -55,6 +47,11 @@ unsafe fn print_formatted(s: *const c_char) {
              if strncmp(s.add(i), "<span class=\"Isus\">\0".as_ptr() as *const c_char, 19) == 0 {
                 libc::printf(red.as_ptr() as *const c_char);
                 i += 19;
+                continue;
+            }
+             if strncmp(s.add(i), "<span class=\\'Isus\\'>\0".as_ptr() as *const c_char, 21) == 0 {
+                libc::printf(red.as_ptr() as *const c_char);
+                i += 21;
                 continue;
             }
             if strncmp(s.add(i), "</span>\0".as_ptr() as *const c_char, 7) == 0 {

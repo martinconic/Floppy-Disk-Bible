@@ -60,8 +60,8 @@ Ensure `xz` (or `xz.exe`) is in your system PATH. The readers rely on `popen("xz
     cd bible_reader_c_nostart
     # macOS:
     gcc -Os -s -nostartfiles -Wl,-e,_start -o main main.c
-    # Linux (Remove underscores):
-    # gcc -Os -s -nostartfiles -Wl,-e,start -o main main.c
+    # Linux:
+    gcc -Os -s -nostartfiles -Wl,-e,start -o main main.c
     ./main read Ioan 3 16
     ```
 
@@ -85,7 +85,7 @@ Ensure `xz` (or `xz.exe`) is in your system PATH. The readers rely on `popen("xz
     *Platform: All*
     ```bash
     cd bible_reader_zig_opt
-    zig build-exe main.zig -O ReleaseSmall -fstrip -lc
+    zig build-exe main.zig --name main_zig -O ReleaseSmall -fstrip -lc
     ./main read Ioan 3 16
     ```
 
@@ -112,8 +112,16 @@ Ensure `xz` (or `xz.exe`) is in your system PATH. The readers rely on `popen("xz
     mv target/release/bible_reader_rust_opt main
     ./main read Ioan 3 16
     ```
+    
+8.  **Rust Implementation (Standard)**
+    *Platform: All*
+    ```bash
+    cd bible_reader_rust
+    rustc -C opt-level=z -C lto -C panic=abort -C strip=symbols main.rs -o main
+    ./main read Ioan 3 16
+    ```
 
-8.  **Go Implementation (Optimized)**
+9.  **Go Implementation (Optimized)**
     *Platform: All*
     ```bash
     cd bible_reader_go_opt
@@ -121,7 +129,7 @@ Ensure `xz` (or `xz.exe`) is in your system PATH. The readers rely on `popen("xz
     ./main read Ioan 3 16
     ```
 
-9.  **Odin Implementation**
+10. **Odin Implementation**
     *Platform: All*
     ```bash
     cd bible_reader_odin
@@ -129,7 +137,7 @@ Ensure `xz` (or `xz.exe`) is in your system PATH. The readers rely on `popen("xz
     ./main read Ioan 3 16
     ```
 
-10. **Forth Implementation (Termkey Image)**
+11. **Forth Implementation (Termkey Image)**
     *Platform: All*
     ```bash
     cd bible_reader_forth
