@@ -8,23 +8,23 @@ The Bible text data, compressed with `xz`, occupies **~1.16 MB**. This leaves ap
 
 All binaries are verified to parse the data, handle formatting (e.g., Red Text for Jesus' words), and provide search functionality.
 
-| Language | Binary Size | Floppy Fit | Notes |
-| :--- | :--- | :--- | :--- |
-| **Forth** | `~4.5 KB`* | ✅ Yes | *Script/Image size. Requires `gforth` VM (or bundled). |
-| **C (Nostart)** | `~9.0 KB` | ✅ Yes | Experimental `-nostartfiles`. (Crash prone on macOS). |
-| **C (Standard)** | `~9.4 KB` | ✅ Yes | Standard GCC build. |
-| **C++** | `~9.5 KB` | ✅ Yes | Optimized with `-fno-rtti -fno-exceptions`. |
-| **Fortran (Optimized)** | `~13 KB` | ✅ Yes | `gfortran -Os -s` + C bindings. |
-| **Fortran (Standard)** | `~14 KB` | ✅ Yes | `gfortran -O3 -s`. Very lean. |
-| **Odin** | `~23 KB` | ✅ Yes | Uses `core:c` bindings, minimal runtime. |
-| **Zig (Optimized)** | `~17 KB` | ✅ Yes | Manual `libc` bindings, stripped. |
-| **Zig (Standard)** | `~51 KB` | ✅ Yes | `ReleaseSmall`, stripped. |
-| **Go (Optimized)** | `~90 KB` | ✅ Yes | TinyGo + LibC bindings (No FMT). |
-| **Pascal (Optimized)** | `~107 KB` | ✅ Yes | Free Pascal (`-XX -Xs`), No SysUtils, Stripped. |
-| **Pascal (Standard)** | `~130 KB` | ✅ Yes | Standard Free Pascal build. |
-| **Rust (Optimized)** | `~9 KB` | ✅ Yes | `no_std`, `libc`, manually stripped. |
-| **Rust (Standard)** | `~371 KB` | ❌ No | Standard build stripped. |
-| **Go (Standard)** | `~1,700 KB` | ❌ No | Standard build. Garbage collector/runtime overhead. |
+| Language | Size (macOS) | Size (Linux) | Floppy Fit | Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| **Forth** | `~4.5 KB`* | `~4.5 KB`* | ✅ Yes | *Script/Image size. Requires `gforth` VM (or bundled). |
+| **C (Nostart)** | `~9.0 KB` | `~13.5 KB` | ✅ Yes | `-nostartfiles`. Linux uses `start` symbol. |
+| **C (Standard)** | `~9.4 KB` | `~14.5 KB` | ✅ Yes | Standard GCC build. |
+| **C++** | `~9.5 KB` | `~14.5 KB` | ✅ Yes | Optimized with `-fno-rtti -fno-exceptions`. |
+| **Fortran (Optimized)** | `~13 KB` | `~14.4 KB` | ✅ Yes | `gfortran -Os -s` + C bindings. |
+| **Fortran (Standard)** | `~14 KB` | `~18.5 KB` | ✅ Yes | `gfortran -O3 -s`. |
+| **Rust (Optimized)** | `~9 KB` | `~6.7 KB` | ✅ Yes | `no_std`, `libc`, manually stripped. |
+| **Zig (Optimized)** | `~17 KB` | TBD | ✅ Yes | Manual `libc` bindings, stripped. |
+| **Zig (Standard)** | `~51 KB` | TBD | ✅ Yes | `ReleaseSmall`, stripped. |
+| **Odin** | `~23 KB` | `~27.0 KB` | ✅ Yes | Uses `core:c` bindings, minimal runtime. |
+| **Go (Optimized)** | `~90 KB` | TBD | ✅ Yes | TinyGo + LibC bindings (No FMT). |
+| **Pascal (Optimized)** | `~107 KB` | TBD | ✅ Yes | Free Pascal (`-XX -Xs`), No SysUtils, Stripped. |
+| **Pascal (Standard)** | `~130 KB` | TBD | ✅ Yes | Standard Free Pascal build. |
+| **Rust (Standard)** | `~371 KB` | `~375 KB` | ❌ No | Standard build stripped. |
+| **Go (Standard)** | `~1,700 KB` | `~1,860 KB` | ❌ No | Standard build. Garbage collector/runtime overhead. |
 
 ---
 
@@ -50,8 +50,13 @@ Ensure `xz` (or `xz.exe`) is in your system PATH. The readers rely on `popen("xz
     *Platform: All*
     ```bash
     cd bible_reader_c
+    # macOS:
     gcc -O3 -s -o main main.c
-    ./main read Ioan 3 16
+    
+    # Linux:
+    gcc -O3 -s -o main_linux main.c
+    
+    ./main_linux read Ioan 3 16 (or ./main on macOS)
     ```
 
 2.  **C Nostartfiles (Experimental)**
@@ -60,81 +65,119 @@ Ensure `xz` (or `xz.exe`) is in your system PATH. The readers rely on `popen("xz
     cd bible_reader_c_nostart
     # macOS:
     gcc -Os -s -nostartfiles -Wl,-e,_start -o main main.c
+    
     # Linux:
-    gcc -Os -s -nostartfiles -Wl,-e,start -o main main.c
-    ./main read Ioan 3 16
+    gcc -Os -s -nostartfiles -Wl,-e,start -flto -fno-asynchronous-unwind-tables -fno-stack-protector -ffunction-sections -fdata-sections -Wl,--gc-sections -o main_linux main.c
+    
+    ./main_linux read Ioan 3 16 (or ./main on macOS)
     ```
 
 3.  **C++ Implementation**
     *Platform: All*
     ```bash
     cd bible_reader_cpp
+    # macOS:
     g++ -O3 -s -fno-rtti -fno-exceptions -o main main.cpp
-    ./main read Ioan 3 16
+    
+    # Linux:
+    g++ -O3 -s -fno-rtti -fno-exceptions -o main_linux main.cpp
+    
+    ./main_linux read Ioan 3 16
     ```
 
 4.  **Fortran Implementation (Optimized)**
-    *Platform: All (macOS/Linux use `-Wl,-dead_strip`)*
+    *Platform: All*
     ```bash
     cd bible_reader_fortran_opt
+    # macOS:
     gfortran -Os -s -Wl,-dead_strip -o main main.f90
-    ./main read Ioan 3 16
+    
+    # Linux:
+    gfortran -Os -s -o main_linux main.f90
+
+    ./main_linux read Ioan 3 16
     ```
 
 5.  **Zig Implementation (Optimized)**
     *Platform: All*
     ```bash
     cd bible_reader_zig_opt
-    zig build-exe main.zig --name main_zig -O ReleaseSmall -fstrip -lc
-    ./main read Ioan 3 16
+    # macOS:
+    zig build-exe main.zig -O ReleaseSmall -fstrip -lc
+    
+    # Linux:
+    zig build-exe main.zig --name main_linux -O ReleaseSmall -fstrip -lc
+    
+    ./main_linux read Ioan 3 16
     ```
 
 6.  **Pascal Implementation (Optimized)**
     *Platform: All (Windows uses `main.exe`)*
     ```bash
     cd bible_reader_pascal_opt
+    # macOS:
     fpc -O3 -XX -Xs -omain main.pas
-    # Optional: strip main (or main.exe)
-    ./main read Ioan 3 16
+    
+    # Linux:
+    fpc -O3 -XX -Xs -omain_linux main.pas
+    
+    # Optional: strip main_linux
+    ./main_linux read Ioan 3 16
     ```
 
 7.  **Rust Implementation (Optimized)**
-    *Platform: All (Remove `-C link-arg` on Linux/Windows)*
+    *Platform: All*
     ```bash
     cd bible_reader_rust_opt
     # macOS:
     RUSTFLAGS="-C link-arg=-lSystem" cargo build --release
-    # Linux/Windows:
-    # cargo build --release
-
-    strip target/release/bible_reader_rust_opt
-    # Windows: copy target\release\bible_reader_rust_opt.exe main.exe
     mv target/release/bible_reader_rust_opt main
-    ./main read Ioan 3 16
+    
+    # Linux:
+    cargo build --release
+    mv target/release/bible_reader_rust_opt main_linux
+    strip main_linux
+
+    ./main_linux read Ioan 3 16
     ```
     
 8.  **Rust Implementation (Standard)**
     *Platform: All*
     ```bash
     cd bible_reader_rust
+    # macOS:
     rustc -C opt-level=z -C lto -C panic=abort -C strip=symbols main.rs -o main
-    ./main read Ioan 3 16
+    
+    # Linux:
+    rustc -C opt-level=z -C lto -C panic=abort -C strip=symbols main.rs -o main_linux
+    
+    ./main_linux read Ioan 3 16
     ```
 
 9.  **Go Implementation (Optimized)**
     *Platform: All*
     ```bash
     cd bible_reader_go_opt
+    # macOS:
     tinygo build -o main -opt=z -no-debug main.go
-    ./main read Ioan 3 16
+    
+    # Linux:
+    tinygo build -o main_linux -opt=z -no-debug main.go
+    
+    ./main_linux read Ioan 3 16
     ```
 
 10. **Odin Implementation**
     *Platform: All*
     ```bash
     cd bible_reader_odin
+    # macOS:
     odin build main.odin -file -o:speed -no-bounds-check
-    ./main read Ioan 3 16
+    
+    # Linux:
+    odin build main.odin -file -o:speed -no-bounds-check -out:main_linux
+    
+    ./main_linux read Ioan 3 16
     ```
 
 11. **Forth Implementation (Termkey Image)**
@@ -151,9 +194,9 @@ Ensure `xz` (or `xz.exe`) is in your system PATH. The readers rely on `popen("xz
     *Linux "Standalone" Trick:*
     ```bash
     # Concatenate engine + image
-    cat `which gforth-fast` reader.fi > bible_reader
-    chmod +x bible_reader
-    ./bible_reader read Ioan 3 16
+    cat `which gforth-fast` reader.fi > bible_reader_linux
+    chmod +x bible_reader_linux
+    ./bible_reader_linux read Ioan 3 16
     ```
 
     *Windows:*

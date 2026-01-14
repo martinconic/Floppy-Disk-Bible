@@ -49,7 +49,7 @@ void trim_newline(char *s) {
     *p = 0;
 }
 
-void bible_logic(int argc, char **argv, char **envp) {
+void __attribute__((used)) bible_logic(int argc, char **argv, char **envp) {
   // Manually set environ for libc so popen works
 #ifdef __APPLE__
   *_NSGetEnviron() = envp;
