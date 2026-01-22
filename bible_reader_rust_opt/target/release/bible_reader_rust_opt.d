@@ -1,0 +1,1 @@
+/home/calin/repos/martinconic/Floppy-Disk-Bible/bible_reader_rust_opt/target/release/bible_reader_rust_opt: /home/calin/repos/martinconic/Floppy-Disk-Bible/bible_reader_rust_opt/build.rs /home/calin/repos/martinconic/Floppy-Disk-Bible/bible_reader_rust_opt/src/main.rs
