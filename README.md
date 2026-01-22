@@ -17,14 +17,21 @@ All binaries are verified to parse the data, handle formatting (e.g., Red Text f
 | **Fortran (Optimized)** | `~13 KB` | `~14.4 KB` | ✅ Yes | `gfortran -Os -s` + C bindings. |
 | **Fortran (Standard)** | `~14 KB` | `~18.5 KB` | ✅ Yes | `gfortran -O3 -s`. |
 | **Rust (Optimized)** | `~9 KB` | `~6.7 KB` | ✅ Yes | `no_std`, `libc`, manually stripped. |
-| **Zig (Optimized)** | `~17 KB` | TBD | ✅ Yes | Manual `libc` bindings, stripped. |
-| **Zig (Standard)** | `~51 KB` | TBD | ✅ Yes | `ReleaseSmall`, stripped. |
+| **Zig (Optimized)** | `~6.0 KB` | `~5.8 KB` | ✅ Yes | `no_std`, manual `libc` bindings, stripped. |
+| **Zig (Standard)** | `~51 KB` | `~58 KB` | ✅ Yes | `ReleaseSmall`, stripped. |
 | **Odin** | `~23 KB` | `~27.0 KB` | ✅ Yes | Uses `core:c` bindings, minimal runtime. |
 | **Go (Optimized)** | `~90 KB` | TBD | ✅ Yes | TinyGo + LibC bindings (No FMT). |
 | **Pascal (Optimized)** | `~107 KB` | TBD | ✅ Yes | Free Pascal (`-XX -Xs`), No SysUtils, Stripped. |
 | **Pascal (Standard)** | `~130 KB` | TBD | ✅ Yes | Standard Free Pascal build. |
 | **Rust (Standard)** | `~371 KB` | `~375 KB` | ❌ No | Standard build stripped. |
 | **Go (Standard)** | `~1,700 KB` | `~1,860 KB` | ❌ No | Standard build. Garbage collector/runtime overhead. |
+
+### Why differs from C?
+
+You might notice that **Rust (Optimized)** and **Zig (Optimized)** are smaller than even the highly optimized **C (Standard)** build (~6-7 KB vs ~14 KB).
+
+*   **C (Standard)**: Links against the standard C runtime startup files (like `crt1.o`, `crti.o`). This includes initialization code (`_start`, constructors, environment setup) that runs before `main()`. This adds a fixed overhead of ~4-8 KB.
+*   **Rust/Zig (Optimized)**: These implementations interact directly with the OS entry point or raw `libc` without the standard language runtime. They are effectively "freestanding" or "no_std" programs that define their own minimal entry points, skipping the standard C startup overhead. 
 
 ---
 

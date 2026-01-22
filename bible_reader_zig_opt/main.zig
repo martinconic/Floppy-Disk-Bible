@@ -1,4 +1,4 @@
-const std = @import("std");
+// const std = @import("std"); // Removed to avoid overhead
 
 // Manual LibC bindings to avoid @cImport hang/overhead
 extern "c" fn printf(format: [*:0]const u8, ...) c_int;
@@ -30,22 +30,22 @@ fn trimNewline(buf: [*c]u8) void {
     }
 }
 
-pub fn main() !void {
-    if (std.os.argv.len < 3) {
+pub export fn main(argc: c_int, argv: [*c][*c]u8) c_int {
+    if (argc < 3) {
         _ = printf("Usage: bible_reader_zig_opt read Book <Chap> <Verse>\n");
-        return;
+        return 0;
     }
 
-    const arg_book = std.os.argv[2];
+    const arg_book = argv[2];
     
     var target_chap: c_int = 0;
-    if (std.os.argv.len > 3) {
-        target_chap = atoi(std.os.argv[3]);
+    if (argc > 3) {
+        target_chap = atoi(argv[3]);
     }
     
     var target_verse: c_int = 0;
-    if (std.os.argv.len > 4) {
-        target_verse = atoi(std.os.argv[4]);
+    if (argc > 4) {
+        target_verse = atoi(argv[4]);
     }
 
     const cmd = "xz -d -c ../bible_data.txt.xz";
@@ -54,9 +54,9 @@ pub fn main() !void {
     const fp = popen(cmd, mode);
     if (fp == null) {
         _ = printf("popen failed\n");
-        return;
+        return 1;
     }
-    defer _ = pclose(fp.?);
+    // defer _ = pclose(fp.?); // Moved to end
 
     var line_buf: [MAX_LINE]u8 = undefined;
     var book_buf: [100]u8 = undefined;
@@ -145,6 +145,8 @@ pub fn main() !void {
             has_title = false;
         }
     }
+    _ = pclose(fp.?);
+    return 0;
 }
 
 fn printFormatted(s: [*c]const u8) void {
